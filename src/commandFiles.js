@@ -32,43 +32,51 @@ export default async function readCmdFiles(cmd, dirName, cmdPrefix) {
 			const imported = await import(
 				URL.pathToFileURL(filePath).toString()
 			);
-			const name = imported.name || cmdPrefix.concat(
-				(fileName === "index"
-					? cmdPrefix.length > 0
-						? []
-						: fileName
-					: fileName)
-			).join(" ");
+			const name =
+				imported.name ||
+				cmdPrefix
+					.concat(
+						fileName === "index"
+							? cmdPrefix.length > 0
+								? []
+								: fileName
+							: fileName
+					)
+					.join(" ");
 
-			cmd.addCommand("aliasTo" in imported ? {
-				name,
-				id: imported.id || name,
-				aliasTo: imported.aliasTo,
-				caseSensitive: imported.caseSensitive,
-				prefixOverride: imported.prefixOverride,
-			} : {
-				func:
-					imported.func ||
-					imported.default ||
-					t(
-						new Error(
-							"a `func` or `default` exported function is required"
-						)
-					),
-				// e.g:
-				// commands/commandname.js => !commandname
-				// commands/sub/command.js = !sub command
-				// commands/sub/command/index.js -> !sub command
-				// commands/asdf.js (`export const name = "somethingelse"`)
-				//   -> !somethingelse
-				name: name,
-				id: imported.id || name,
-				description: imported.description,
-				pms: imported.pms,
-				argType: imported.argType,
-				caseSensitive: imported.caseSensitive,
-				prefixOverride: imported.prefixOverride,
-			});
+			cmd.addCommand(
+				"aliasTo" in imported
+					? {
+							name,
+							id: imported.id || name,
+							aliasTo: imported.aliasTo,
+							caseSensitive: imported.caseSensitive,
+							prefixOverride: imported.prefixOverride,
+					  }
+					: {
+							func:
+								imported.func ||
+								imported.default ||
+								t(
+									new Error(
+										"a `func` or `default` exported function is required"
+									)
+								),
+							// e.g:
+							// commands/commandname.js => !commandname
+							// commands/sub/command.js = !sub command
+							// commands/sub/command/index.js -> !sub command
+							// commands/asdf.js (`export const name = "somethingelse"`)
+							//   -> !somethingelse
+							name: name,
+							id: imported.id || name,
+							description: imported.description,
+							pms: imported.pms,
+							argType: imported.argType,
+							caseSensitive: imported.caseSensitive,
+							prefixOverride: imported.prefixOverride,
+					  }
+			);
 		} else if (ent.isDirectory()) {
 			const isGroup = ent.name.startsWith("(") && ent.name.endsWith(")");
 			await readCmdFiles(

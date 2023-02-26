@@ -19,10 +19,10 @@ export const doCommandFiles = _doCommandFiles;
 /**
  * @typedef {{
  * 	prefix?: string,
-* 	defaultListeners?: boolean,
-* 	caseSensitive?: false,
-* }} OptionsInput
-*/
+ * 	defaultListeners?: boolean,
+ * 	caseSensitive?: false,
+ * }} OptionsInput
+ */
 
 /**
  * @typedef {{
@@ -86,15 +86,21 @@ export default class cmdlib {
 		 * 	@type {Array<Command | Alias>}
 		 */
 		this.__cmds = [];
-		
-		this.client.on("privmsg", 
-		/**
-		 * @param {*} msg
-		 */ (msg) => {
-			if (this.options.defaultListeners) {
-				this.runCommands(msg, !msg.target.startsWith("#"));
+
+		this.client.on(
+			"privmsg",
+			/**
+			 * @param {*} msg
+			 */ msg => {
+				if (this.options.defaultListeners) {
+					this.runCommands(
+						msg,
+						msg.message,
+						!msg.target.startsWith("#")
+					);
+				}
 			}
-		});
+		);
 	}
 
 	/**
@@ -102,36 +108,42 @@ export default class cmdlib {
 	 * 	@param {Command | Alias} options
 	 */
 	addCommand(options) {
-		this.__cmds.push({argType: "auto", ...options});
+		this.__cmds.push({
+			argType: "auto",
+			...options,
+			// @ts-ignore
+			pms: options.pms ?? true,
+		});
 	}
 
 	/**
 	 * @param {IrcFrameworkMessage} msg
+	 * @param {string} content
 	 * @param {boolean} isPM
 	 * @returns
 	 */
-	runCommands(msg, isPM) {
+	runCommands(msg, content, isPM) {
 		let cmdToRun = null;
 		let realCmdToRun = null;
+		let unaliasedCmdToRun = null;
 
-		const lowerContent = msg.message.toLowerCase();
+		const lowerContent = content.toLowerCase();
 
 		for (const _cmd of this.__cmds) {
-			/**
-			 * @type {Command | Alias}
-			 */
 			let cmd = _cmd;
 			if ("aliasTo" in _cmd) {
 				/**
 				 * @type {Command | Alias | undefined}
 				 */
 				const alias = this.__cmds.find(c => c.id === _cmd.aliasTo);
-				if (!alias) throw new Error(
-					`Aliases can't point to nonexistent commands (cause: command "${_cmd.id}")`
-				)
-				if ("aliasTo" in alias) throw new Error(
-					`Aliases can't point to aliases (cause: command "${_cmd.id}")`
-				)
+				if (!alias)
+					throw new Error(
+						`Aliases can't point to nonexistent commands (cause: command "${_cmd.id}")`
+					);
+				if ("aliasTo" in alias)
+					throw new Error(
+						`Aliases can't point to aliases (cause: command "${_cmd.id}")`
+					);
 				cmd = alias;
 			}
 
@@ -141,13 +153,14 @@ export default class cmdlib {
 			const lowerName = fullCmd.toLowerCase();
 
 			// @ts-ignore
-			const caseSensitive = cmd.caseSensitive ?? this.options.caseSensitive;
+			const caseSensitive =
+				cmd.caseSensitive ?? this.options.caseSensitive;
 
 			if (
 				(!caseSensitive && lowerContent === lowerName) ||
 				(!caseSensitive && lowerContent.startsWith(lowerName + " ")) ||
-				(caseSensitive && msg.message === fullCmd) ||
-				(caseSensitive && msg.message.startsWith(fullCmd + " "))
+				(caseSensitive && content === fullCmd) ||
+				(caseSensitive && content.startsWith(fullCmd + " "))
 			) {
 				if (
 					// @ts-ignore
@@ -160,15 +173,27 @@ export default class cmdlib {
 					if (cmdToRun === null || name.length > cmdToRun.length) {
 						cmdToRun = name;
 						// @ts-ignore
-						realCmdToRun = cmd.id;
+						realCmdToRun = _cmd;
+						unaliasedCmdToRun = cmd;
 					}
 				}
 			}
 		}
+		if (!(realCmdToRun && unaliasedCmdToRun)) return;
 
-		if (!realCmdToRun) return;
+		if ("aliasTo" in realCmdToRun && realCmdToRun.aliasTo) {
+			// Do it this way so subcommands work within aliases
+			const fullCmd =
+				(unaliasedCmdToRun.prefixOverride ?? this.options.prefix) +
+				unaliasedCmdToRun.name;
+			const aliasFullCmd =
+				(realCmdToRun.prefixOverride ?? this.options.prefix) +
+				realCmdToRun.name;
+			this.runCommands(msg, content.replace(aliasFullCmd, fullCmd), isPM);
+			return;
+		}
 
-		this.runCommand(realCmdToRun, msg);
+		this.runCommand(realCmdToRun.id, msg);
 	}
 
 	/**
