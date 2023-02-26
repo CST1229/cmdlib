@@ -132,6 +132,10 @@ export default class cmdlib {
 		for (const _cmd of this.__cmds) {
 			let cmd = _cmd;
 			if ("aliasTo" in _cmd) {
+				if (_cmd.aliasTo === _cmd.id)
+					throw new Error(
+						`Aliases can't point to themselves (cause: command "${_cmd.id}")`
+					);
 				/**
 				 * @type {Command | Alias | undefined}
 				 */
