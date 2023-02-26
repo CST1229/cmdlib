@@ -32,13 +32,12 @@ export default async function readCmdFiles(cmd, dirName, cmdPrefix) {
 			const imported = await import(
 				URL.pathToFileURL(filePath).toString()
 			);
-			const name = cmdPrefix.concat(
-				imported.name ||
-					(fileName === "index"
-						? cmdPrefix.length > 0
-							? []
-							: fileName
-						: fileName)
+			const name = imported.name || cmdPrefix.concat(
+				(fileName === "index"
+					? cmdPrefix.length > 0
+						? []
+						: fileName
+					: fileName)
 			).join(" ");
 
 			cmd.addCommand("aliasTo" in imported ? {
