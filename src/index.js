@@ -1,4 +1,5 @@
-import doCommandFiles from "./commandFiles.js";
+import _doCommandFiles from "./commandFiles.js";
+export const doCommandFiles = _doCommandFiles;
 
 /**
  * @typedef {*} IrcFrameworkMessage
@@ -281,5 +282,3 @@ export default class cmdlib {
 		return /[a-zA-Z0-9]/.test(letter) ? "" : "\\" + letter;
 	}
 }
-
-export const doCommandFiles = doCommandFiles;
