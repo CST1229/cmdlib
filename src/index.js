@@ -10,11 +10,19 @@ export const doCommandFiles = _doCommandFiles;
 
 /**
  * @typedef {{
- * 	prefix?: string,
- * 	defaultListeners?: boolean,
- * 	caseSensitive?: false,
- * }} CmdLibOptions
+ * 	prefix: string,
+ * 	defaultListeners: boolean,
+ * 	caseSensitive: false,
+ * }} Options
  */
+
+/**
+ * @typedef {{
+ * 	prefix?: string,
+* 	defaultListeners?: boolean,
+* 	caseSensitive?: false,
+* }} OptionsInput
+*/
 
 /**
  * @typedef {{
@@ -26,7 +34,7 @@ export const doCommandFiles = _doCommandFiles;
  * 	caseSensitive?: false,
  *	argType?: "pipes" | "spaces" | "one" | "auto",
  *	pms?: boolean | "only"
- * }} CmdLibCommand
+ * }} Command
  */
 
 /**
@@ -36,7 +44,7 @@ export const doCommandFiles = _doCommandFiles;
  *	aliasTo: string,
  *	prefixOverride?: string,
  * 	caseSensitive?: false,
- * }} CmdLibAlias
+ * }} Alias
  */
 
 /**
@@ -44,13 +52,13 @@ export const doCommandFiles = _doCommandFiles;
  *	@param {IrcFrameworkMessage} msg
  *	@param {IrcFrameworkClient} client
  *	@param {string[]} args
- *	@param {CmdLib} cmdlib
+ *	@param {cmdlib} cmdlib
  */
 
 /**
 	The default options for cmdlib instances.
 	@constant
-	@type {CmdLibOptions}
+	@type {Options}
 */
 const DEFAULT_OPTIONS = {
 	prefix: "!",
@@ -60,26 +68,29 @@ const DEFAULT_OPTIONS = {
 
 export default class cmdlib {
 	/**
-		@param {IrcFrameworkClient} client An irc-framework instance to hook to, for options.defaultListeners.
-		@param {CmdLibOptions} options An options object.
-	*/
+	 * 	@param {IrcFrameworkClient} client An irc-framework instance to hook to, for options.defaultListeners.
+	 * 	@param {OptionsInput} options An options object.
+	 */
 	constructor(client, options = {}) {
 		/**
-			The IRC client instance.
-		*/
+		 * 	The IRC client instance.
+		 */
 		this.client = client;
 		/**
-			The instance's options.
-			@type {CmdLibOptions}
-		*/
+		 * 	The instance's options.
+		 * 	@type {Options}
+		 */
 		this.options = {...DEFAULT_OPTIONS, ...options};
 		/**
-			A list of added commands.
-			@type {Array<CmdLibCommand | CmdLibAlias>}
-		*/
+		 * 	A list of added commands.
+		 * 	@type {Array<Command | Alias>}
+		 */
 		this.__cmds = [];
-
-		this.client.on("privmsg", msg => {
+		
+		this.client.on("privmsg", 
+		/**
+		 * @param {*} msg
+		 */ (msg) => {
 			if (this.options.defaultListeners) {
 				this.runCommands(msg, !msg.target.startsWith("#"));
 			}
@@ -87,17 +98,14 @@ export default class cmdlib {
 	}
 
 	/**
-		Adds a command
-		@param {CmdLibCommand | CmdLibAlias} options
-	*/
+	 * 	Adds a command
+	 * 	@param {Command | Alias} options
+	 */
 	addCommand(options) {
 		this.__cmds.push({argType: "auto", ...options});
 	}
 
-	// i give up on the jsdoc lol
-
 	/**
-	 *
 	 * @param {IrcFrameworkMessage} msg
 	 * @param {boolean} isPM
 	 * @returns
@@ -110,12 +118,12 @@ export default class cmdlib {
 
 		for (const _cmd of this.__cmds) {
 			/**
-			 * @type {CmdLibCommand | CmdLibAlias}
+			 * @type {Command | Alias}
 			 */
 			let cmd = _cmd;
 			if ("aliasTo" in _cmd) {
 				/**
-				 * @type {CmdLibCommand | CmdLibAlias | undefined}
+				 * @type {Command | Alias | undefined}
 				 */
 				const alias = this.__cmds.find(c => c.id === _cmd.aliasTo);
 				if (!alias) throw new Error(
@@ -149,10 +157,11 @@ export default class cmdlib {
 					// @ts-ignore
 					(isPM && cmd.pms === "only")
 				) {
-					if (cmdToRun === null || name.length > cmdToRun.length)
+					if (cmdToRun === null || name.length > cmdToRun.length) {
 						cmdToRun = name;
 						// @ts-ignore
 						realCmdToRun = cmd.id;
+					}
 				}
 			}
 		}
