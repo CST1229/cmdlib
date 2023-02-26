@@ -13,10 +13,11 @@ function t(e) {
 
 /**
  * Recursively search a directory of files for command files.
+ * @param {import("./index.js").cmdlib} cmd The cmdlib instance to use.
  * @param {string} dirName Directory to search.
  * @param {Array<String>} cmdPrefix An array of "parent" commands, for subcommands
  */
-export default async function readCmdFiles(dirName, cmdPrefix) {
+export default async function readCmdFiles(cmd, dirName, cmdPrefix) {
 	const directory = await fs.readdir(dirName, {withFileTypes: true});
 
 	for (const ent of directory) {
