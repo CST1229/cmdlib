@@ -6,15 +6,8 @@ Mostly on GitHub for (probably) easier type stuff (because it's a separate packa
 
 ## Usage
 
-Add it as a dependency manually, then `npm install`.
-
-```json
-{
-	"dependencies": {
-		"cmdlib": "CST1229/cmdlib#master"
-	}
-}
-
+```
+npm install CST1229/cmdlib
 ```
 
 There isn't much documentation as it's not really meant for other people to use (though I do allow doing so), but you can read the code (it has some JSDoc).
