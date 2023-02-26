@@ -2,7 +2,7 @@
 
 A tiny library for handling commands for bots made using [irc-framework](https://github.com/kiwiirc/irc-framework).
 
-Mostly on GitHub for (probably) easier type stuff and to not have to copy it into the bot's code. Not really meant for other people to use (at least, not yet).
+Mostly on GitHub for (probably) easier type stuff (because it's a separate package) and to not have to copy it into the bot's code. Not really meant for other people to use (at least, not yet).
 
 ## Usage
 
