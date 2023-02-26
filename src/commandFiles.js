@@ -13,7 +13,7 @@ function t(e) {
 
 /**
  * Recursively search a directory of files for command files.
- * @param {import("./index.js").cmdlib} cmd The cmdlib instance to use.
+ * @param {import("./index.js").default} cmd The cmdlib instance to use.
  * @param {string} dirName Directory to search.
  * @param {Array<String>} cmdPrefix An array of "parent" commands, for subcommands
  */
@@ -73,6 +73,7 @@ export default async function readCmdFiles(cmd, dirName, cmdPrefix) {
 		} else if (ent.isDirectory()) {
 			const isGroup = ent.name.startsWith("(") && ent.name.endsWith(")");
 			await readCmdFiles(
+				cmd,
 				path.join(dirName, ent.name),
 				isGroup ? cmdPrefix : cmdPrefix.concat(ent.name)
 			);
