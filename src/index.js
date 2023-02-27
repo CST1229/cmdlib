@@ -29,6 +29,7 @@ export const doCommandFiles = _doCommandFiles;
  *	name: string,
  * 	id: string,
  * 	description?: string,
+ * 	meta?: *,
  *	func: CommandCallback,
  *	prefixOverride?: string,
  * 	caseSensitive?: false,

@@ -71,6 +71,7 @@ export default async function readCmdFiles(cmd, dirName, cmdPrefix) {
 							name: name,
 							id: imported.id || name,
 							description: imported.description,
+							meta: imported,
 							pms: imported.pms,
 							argType: imported.argType,
 							caseSensitive: imported.caseSensitive,
