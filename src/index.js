@@ -198,16 +198,15 @@ export default class cmdlib {
 			return;
 		}
 
-		this.runCommand(realCmdToRun.id, msg);
+		this.runCommand(realCmdToRun.id, msg, content);
 	}
 
 	/**
 	 * @param {string} id
 	 * @param {IrcFrameworkMessage} msg
+	 * @param {string} content
 	 */
-	runCommand(id, msg) {
-		const content = msg.message;
-
+	runCommand(id, msg, content) {
 		const cmd = this.__cmds.find(cmd => cmd.id === id);
 		if (!cmd) return;
 
